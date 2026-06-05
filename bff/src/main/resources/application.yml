@@ -1,0 +1,60 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: alertas-medicas-bff
+
+  # ─────────────────────────────────────────────
+  # H2 en memoria (temporal, sin Oracle)
+  # ─────────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:alertasdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+    ddl-auto: create
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # ─────────────────────────────────────────────
+  # Azure AD B2C
+  # ─────────────────────────────────────────────
+  spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://testazure2026.b2clogin.com/testazure2026.onmicrosoft.com/discovery/v2.0/keys?p=B2C_1_signin
+azure:
+  b2c:
+    tenant-name: ${AZURE_B2C_TENANT_NAME}
+    tenant-id: ${AZURE_B2C_TENANT_ID}
+    client-id: ${AZURE_B2C_CLIENT_ID}
+    client-secret: ${AZURE_B2C_CLIENT_SECRET}
+    flow-name: ${AZURE_B2C_FLOW_NAME}
+
+microservicios:
+  pacientes:
+    url: http://localhost:8081
+  alertas:
+    url: http://localhost:8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    cl.duoc.alertasmedicas: DEBUG
+    org.springframework.security: DEBUG

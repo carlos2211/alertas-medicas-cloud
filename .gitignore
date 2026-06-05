@@ -1,0 +1,18 @@
+# Archivo con credenciales reales - NUNCA al repositorio
+.env
+
+# Maven
+target/
+*.class
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml

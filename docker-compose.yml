@@ -1,0 +1,76 @@
+version: '3.9'
+
+# ──────────────────────────────────────────────────────────────────
+# Sistema de Alertas Médicas - Docker Compose
+#
+# Servicios:
+#   bff                   → Backend For Frontend (Spring Boot, puerto 8080)
+#   microservicio-pacientes → Microservicio pacientes  (puerto 8081)
+#   microservicio-alertas   → Microservicio alertas    (puerto 8082)
+#   oracle-db              → Oracle XE para desarrollo local
+#
+# Variables de entorno de Azure AD B2C:
+#   Crea un archivo .env en la raíz (NO lo subas a Git) con:
+#     AZURE_B2C_TENANT_NAME=miempresa
+#     AZURE_B2C_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+#     AZURE_B2C_CLIENT_ID=yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+#     AZURE_B2C_FLOW_NAME=B2C_1_signupsignin
+#     ORACLE_PASSWORD=AlertasPass123
+# ──────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── BFF ─────────────────────────────────────────────────────────
+  bff:
+    build:
+      context: ./bff
+      dockerfile: Dockerfile
+    container_name: alertas-bff
+    ports:
+      - "8080:8080"
+    environment:
+      # Azure AD B2C
+      AZURE_B2C_TENANT_NAME: ${AZURE_B2C_TENANT_NAME}
+      AZURE_B2C_TENANT_ID:   ${AZURE_B2C_TENANT_ID}
+      AZURE_B2C_CLIENT_ID:   ${AZURE_B2C_CLIENT_ID}
+      AZURE_B2C_FLOW_NAME:   ${AZURE_B2C_FLOW_NAME:-B2C_1_signupsignin}
+      # Oracle
+      SPRING_DATASOURCE_URL:      jdbc:oracle:thin:@//oracle-db:1521/XEPDB1
+      SPRING_DATASOURCE_USERNAME: alertas_user
+      SPRING_DATASOURCE_PASSWORD: ${ORACLE_PASSWORD:-AlertasPass123}
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    networks:
+      - alertas-net
+    restart: unless-stopped
+
+  # ── Oracle XE (desarrollo local) ────────────────────────────────
+  # En producción usa Oracle Cloud (OCI) y apunta la URL al host real
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: alertas-oracle
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-AlertasPass123}
+      APP_USER:        alertas_user
+      APP_USER_PASSWORD: ${ORACLE_PASSWORD:-AlertasPass123}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./sql/init.sql:/container-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - alertas-net
+
+networks:
+  alertas-net:
+    driver: bridge
+
+volumes:
+  oracle-data:
