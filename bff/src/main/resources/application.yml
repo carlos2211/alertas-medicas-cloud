@@ -13,13 +13,7 @@ spring:
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 5
-      data-source-properties:
-        javax.net.ssl.trustStore: C:/Users/carlos.orrego/Desktop/Carlos/ING SOFTWARE/5/DESARROLLO CLOUD NATIVE/alertas-medicas/alertas-medicas/bff/src/main/resources/wallet/truststore.jks
-        javax.net.ssl.trustStorePassword: Wallet123!
-        javax.net.ssl.keyStore: C:/Users/carlos.orrego/Desktop/Carlos/ING SOFTWARE/5/DESARROLLO CLOUD NATIVE/alertas-medicas/alertas-medicas/bff/src/main/resources/wallet/keystore.jks
-        javax.net.ssl.keyStorePassword: Wallet123!
-        oracle.net.tns_admin: C:/Users/carlos.orrego/Desktop/Carlos/ING SOFTWARE/5/DESARROLLO CLOUD NATIVE/alertas-medicas/alertas-medicas/bff/src/main/resources/wallet
-
+      
   jpa:
     hibernate:
       ddl-auto: create
