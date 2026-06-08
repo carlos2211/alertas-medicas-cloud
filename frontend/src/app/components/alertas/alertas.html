@@ -1,0 +1,148 @@
+<div class="d-flex">
+  <app-navbar></app-navbar>
+
+  <div class="flex-grow-1 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0">
+        <i class="bi bi-bell me-2 text-danger"></i>Alertas Médicas
+      </h4>
+      <button class="btn btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+        <i class="bi bi-plus-lg me-1"></i> Nueva Alerta
+      </button>
+    </div>
+
+    <div *ngIf="mensaje" class="alert alert-info alert-dismissible mb-3">
+      {{ mensaje }}
+      <button type="button" class="btn-close" (click)="mensaje=''"></button>
+    </div>
+
+    <!-- Formulario nueva alerta -->
+    <div class="card mb-4" *ngIf="mostrarFormulario">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Registrar Nueva Alerta</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Paciente *</label>
+            <select class="form-select" [(ngModel)]="nuevaAlerta.pacienteId" name="pacienteId">
+              <option value="0">Seleccionar paciente</option>
+              <option *ngFor="let p of pacientes" [value]="p.id">
+                {{ p.nombre }} {{ p.apellido }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Tipo *</label>
+            <select class="form-select" [(ngModel)]="nuevaAlerta.tipo" name="tipo">
+              <option value="">Seleccionar tipo</option>
+              <option *ngFor="let t of tiposAlerta" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Valor Medido</label>
+            <input type="number" class="form-control" [(ngModel)]="nuevaAlerta.valorMedido" name="valor">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Unidad</label>
+            <input type="text" class="form-control" [(ngModel)]="nuevaAlerta.unidad"
+                   name="unidad" placeholder="Ej: bpm, mmHg">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Severidad</label>
+            <select class="form-select" [(ngModel)]="nuevaAlerta.severidad" name="severidad">
+              <option *ngFor="let s of severidades" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-primary" (click)="crearAlerta()">
+            <i class="bi bi-check-lg me-1"></i>Guardar
+          </button>
+          <button class="btn btn-outline-secondary" (click)="mostrarFormulario = false">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn" [class.btn-danger]="filtroEstado === 'ACTIVA'"
+              [class.btn-outline-danger]="filtroEstado !== 'ACTIVA'"
+              (click)="cambiarFiltro('ACTIVA')">
+        <i class="bi bi-bell-fill me-1"></i>Activas
+      </button>
+      <button class="btn" [class.btn-success]="filtroEstado === 'RESUELTA'"
+              [class.btn-outline-success]="filtroEstado !== 'RESUELTA'"
+              (click)="cambiarFiltro('RESUELTA')">
+        <i class="bi bi-check-circle me-1"></i>Resueltas
+      </button>
+    </div>
+
+    <!-- Tabla alertas -->
+    <div class="card">
+      <div class="card-body">
+        <div *ngIf="cargando" class="text-center py-5">
+          <div class="spinner-border text-danger"></div>
+          <p class="mt-2">Cargando alertas...</p>
+        </div>
+
+        <div *ngIf="!cargando && alertas.length === 0" class="text-center py-5 text-muted">
+          <i class="bi bi-bell-slash" style="font-size: 3rem;"></i>
+          <p class="mt-2">No hay alertas {{ filtroEstado === 'ACTIVA' ? 'activas' : 'resueltas' }}</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!cargando && alertas.length > 0">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Paciente</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Severidad</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of alertas">
+                <td><span class="badge bg-secondary">#{{ a.id }}</span></td>
+                <td class="fw-semibold">{{ getNombrePaciente(a.pacienteId) }}</td>
+                <td>{{ a.tipo }}</td>
+                <td>{{ a.valorMedido }} {{ a.unidad }}</td>
+                <td>
+                  <span class="badge"
+                    [class.bg-danger]="a.severidad === 'ALTA'"
+                    [class.bg-warning]="a.severidad === 'MEDIA'"
+                    [class.bg-info]="a.severidad === 'BAJA'">
+                    {{ a.severidad }}
+                  </span>
+                </td>
+                <td>
+                  <span [class]="a.estado === 'ACTIVA' ? 'badge-activa' : 'badge-resuelta'">
+                    {{ a.estado }}
+                  </span>
+                </td>
+                <td><small>{{ a.creadaEn | date:'dd/MM/yyyy HH:mm' }}</small></td>
+                <td>
+                  <button *ngIf="a.estado === 'ACTIVA'"
+                          class="btn btn-sm btn-outline-success me-1"
+                          (click)="resolver(a.id!)"
+                          title="Resolver">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger"
+                          (click)="eliminar(a.id!)"
+                          title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

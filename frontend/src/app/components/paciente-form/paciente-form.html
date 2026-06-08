@@ -1,0 +1,67 @@
+<div class="d-flex">
+  <app-navbar></app-navbar>
+
+  <div class="flex-grow-1 p-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <a routerLink="/pacientes" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <h4 class="fw-bold mb-0">
+        <i class="bi bi-person-plus me-2 text-primary"></i>
+        {{ esEdicion ? 'Editar Paciente' : 'Nuevo Paciente' }}
+      </h4>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+      <div class="card-body p-4">
+
+        <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+        <form (ngSubmit)="guardar()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre *</label>
+              <input type="text" class="form-control" [(ngModel)]="paciente.nombre"
+                     name="nombre" required placeholder="Ej: Juan">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Apellido *</label>
+              <input type="text" class="form-control" [(ngModel)]="paciente.apellido"
+                     name="apellido" required placeholder="Ej: Pérez">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">RUT *</label>
+              <input type="text" class="form-control" [(ngModel)]="paciente.rut"
+                     name="rut" required placeholder="Ej: 12345678-9">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Fecha Nacimiento</label>
+              <input type="date" class="form-control" [(ngModel)]="paciente.fechaNacimiento"
+                     name="fechaNacimiento">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Habitación</label>
+              <input type="text" class="form-control" [(ngModel)]="paciente.habitacion"
+                     name="habitacion" placeholder="Ej: 101-A">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Diagnóstico</label>
+              <textarea class="form-control" [(ngModel)]="paciente.diagnostico"
+                        name="diagnostico" rows="3"
+                        placeholder="Descripción del diagnóstico"></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary" [disabled]="cargando">
+              <span *ngIf="cargando" class="spinner-border spinner-border-sm me-1"></span>
+              <i *ngIf="!cargando" class="bi bi-check-lg me-1"></i>
+              {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+            </button>
+            <a routerLink="/pacientes" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

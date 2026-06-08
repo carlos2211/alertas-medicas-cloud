@@ -1,0 +1,40 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center"
+  style="background: linear-gradient(135deg, #1a6b8a 0%, #0d4a63 100%)">
+  <div class="card p-5 text-center" style="max-width: 420px; width: 100%;">
+
+    <div class="mb-4">
+      <i class="bi bi-heart-pulse-fill text-danger" style="font-size: 3rem;"></i>
+      <h2 class="mt-3 fw-bold" style="color: #1a6b8a;">AlertaMédica</h2>
+      <p class="text-muted">Sistema de Alertas en Tiempo Real</p>
+    </div>
+
+    <div class="mb-4">
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+        <i class="bi bi-shield-check text-success"></i>
+        <small class="text-muted">Autenticación segura con Azure AD B2C</small>
+      </div>
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+        <i class="bi bi-hospital text-primary"></i>
+        <small class="text-muted">Acceso para personal médico autorizado</small>
+      </div>
+    </div>
+
+    <div *ngIf="checkingSession">
+      Validando sesión...
+    </div>
+
+    <div *ngIf="!checkingSession">
+      <!-- <button type="button" (click)="login()">
+        Iniciar sesión
+      </button> -->
+      <button class="btn btn-primary btn-lg w-100 py-3" (click)="login()">
+        <i class="bi bi-box-arrow-in-right me-2"></i>
+        Iniciar Sesión
+      </button>
+    </div>
+
+    <p class="text-muted mt-3" style="font-size: 0.8rem;">
+      Hospital Cloud Native © 2026
+    </p>
+  </div>
+</div>
