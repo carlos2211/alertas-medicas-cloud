@@ -1,6 +1,8 @@
 package cl.duoc.alertasmedicas.bff.service;
 
 import cl.duoc.alertasmedicas.bff.model.Alerta;
+import cl.duoc.alertasmedicas.bff.rabbitmq.AlertaRabbitPublisher;  
+// import cl.duoc.alertasmedicas.bff.rabbitmq.AlertaRabbitPublisher;
 import cl.duoc.alertasmedicas.bff.repository.AlertaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class AlertaService {
 
     private final AlertaRepository alertaRepository;
+    private final AlertaRabbitPublisher alertaRabbitPublisher;
 
     public List<Map<String, Object>> listarPorEstado(String estado) {
         return alertaRepository.findByEstado(estado)
@@ -47,7 +50,13 @@ public class AlertaService {
         a.setUnidad((String) dto.get("unidad"));
         a.setSeveridad((String) dto.get("severidad"));
         a.setEstado("ACTIVA");
-        return toMap(alertaRepository.save(a));
+
+        Alerta alertaGuardada = alertaRepository.save(a);
+        Map<String, Object> alertaMap = toMap(alertaGuardada);
+
+        alertaRabbitPublisher.publicarAlertaCreada(alertaMap);
+
+        return alertaMap;
     }
 
     public Map<String, Object> actualizar(Long id, Map<String, Object> dto) {
