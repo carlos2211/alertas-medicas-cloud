@@ -1,10 +1,18 @@
-version: '3.9'
 
 services:
+  rabbitmq:
+    image: public.ecr.aws/docker/library/rabbitmq:3.13-management
+    container_name: rabbitmq-alertas-medicas
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+
   bff:
     build:
       context: ./bff
       dockerfile: Dockerfile
+    image: alertas-medicas-bff
     container_name: alertas-bff
     ports:
       - "8080:8080"
@@ -15,4 +23,8 @@ services:
       AZURE_B2C_FLOW_NAME: ${AZURE_B2C_FLOW_NAME}
       AZURE_B2C_CLIENT_SECRET: ${AZURE_B2C_CLIENT_SECRET}
       TNS_ADMIN: /app/wallet
+    volumes:
+      - ./reportes-json:/app/reportes-json
+    depends_on:
+      - rabbitmq
     restart: unless-stopped

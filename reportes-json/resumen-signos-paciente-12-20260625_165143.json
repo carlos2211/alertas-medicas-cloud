@@ -1,0 +1,9 @@
+{
+  "pacienteId" : 12,
+  "frecuenciaCardiaca" : 82,
+  "presionArterial" : "120/80",
+  "saturacionOxigeno" : 98,
+  "temperatura" : 36.7,
+  "observacion" : "Paciente estable",
+  "fechaRegistro" : "2026-06-25T16:51:43.835917130"
+}
