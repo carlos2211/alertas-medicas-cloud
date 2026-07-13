@@ -17,3 +17,4 @@ target/
 
 # Docker
 docker-compose.override.yml
+reportes-json/resumen-signos-paciente-15-20260625_214927.json

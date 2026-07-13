@@ -1,4 +1,3 @@
-
 services:
   rabbitmq:
     image: public.ecr.aws/docker/library/rabbitmq:3.13-management
@@ -6,6 +5,33 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper-alertas-medicas
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka-alertas-medicas
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-alertas-medicas:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-alertas-medicas:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     restart: unless-stopped
 
   bff:
@@ -23,8 +49,10 @@ services:
       AZURE_B2C_FLOW_NAME: ${AZURE_B2C_FLOW_NAME}
       AZURE_B2C_CLIENT_SECRET: ${AZURE_B2C_CLIENT_SECRET}
       TNS_ADMIN: /app/wallet
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-alertas-medicas:29092
     volumes:
       - ./reportes-json:/app/reportes-json
     depends_on:
       - rabbitmq
+      - kafka
     restart: unless-stopped
